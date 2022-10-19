@@ -1,0 +1,169 @@
+program FinalVersion;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  link = ^List; // Ссылка на элемент двунаправленного списка
+
+  // Запись-элемент двунаправленного списка
+  List = record
+    number: string;
+    name:string;
+    right: link;
+  end;
+
+  link2 = ^List2; // Ссылка на элемент однонаправленного списка
+
+  // Запись-элемент однонаправленного списка
+  List2 = record
+    number: string;
+    right: link2;
+  end;
+
+var
+  beg1L: link;
+  k, i: integer;
+  N: integer;
+  Mas: array of integer;
+  beg2newL, end2newL: link2;
+  vvodstr:string;
+  { Процедура создает каждый новый элемент
+    в двунаправленном списке и добавляет туда все
+    подходящие номера }
+procedure addelementlist1(var first: link);
+var
+  add,Curr: link;
+begin
+  new(add);
+  Curr:=add;
+  add^.right := nil;
+  writeln('Введите номер телефона,который нужно добавить');
+  repeat
+    readln(add^.number);
+    if (length(add^.number) <> 7) then
+    begin
+      writeln('Вы ввели неверный номер телефона, введите верный');
+    end;
+
+  until (length(add^.number) = 7);
+  writeln('Введите фамилию человека');
+  readln(add^.name);
+  if (first = nil) then
+  begin
+    first := add;
+
+  end
+  else
+  begin
+    Curr^.right := add;
+    add^.right := nil;
+    Curr := add;
+
+  end;
+
+end;
+
+
+// Вывод элементов из однонаправленного списка
+procedure vivod(FirstLink: link);
+begin
+  while (FirstLink <> nil) do
+  begin
+    writeln('Номер телефона: ',FirstLink^.number,' фамилия: ',FirstLink^.name);
+    FirstLink := FirstLink^.right;
+  end;
+
+end;
+
+
+
+procedure sort(kol: integer; first1LProc: link);
+var
+  i, j: integer;
+  ref: link;
+  temp1,temp2: string;
+begin
+  ref := first1LProc;
+  for i := 1 to kol - 1 do
+  begin
+    for j := 1 to kol - i do
+    begin
+      if first1LProc^.name > first1LProc^.right^.name
+      then
+      begin
+        temp1 := first1LProc^.name;
+        temp2 := first1LProc^.number;
+        first1LProc^.number := first1LProc^.right^.number;
+        first1LProc^.name := first1LProc^.right^.name;
+        first1LProc^.right^.name := temp1;
+        first1LProc^.right^.number := temp2;
+      end;
+      first1LProc := first1LProc^.right;
+    end;
+    first1LProc := ref;
+  end;
+end;
+
+procedure FindPoNumber(first:link;sNumber:string);
+var
+  check:boolean;
+  curr:link;
+begin
+  check:=true;
+  curr:=first;
+  while (curr<>nil) and (check=true) do
+  begin
+    if curr^.number = sNumber then
+    begin
+      check:=false;
+      writeln('По данному номеру найдена фамилия: ',Curr^.Name);
+    end
+    else
+    begin
+      curr := curr^.right;
+    end;
+
+  end;
+  if check = true then
+  begin
+    writeln('По данному номеру не было найдено фамилии');
+  end;
+
+end;
+
+begin
+  N := 0;
+  repeat
+    writeln('Ввести новый элемент? (1-если да,0-если нет)');
+    readln(k);
+    if k = 1 then
+    begin
+      addelementlist1(beg1L);
+      inc(N);
+    end;
+
+  until k = 0;
+
+  writeln('Ваши упорядоченные элементы списка ');
+  sort(N, beg1L);
+  vivod(Beg1L);
+  writeln;
+
+  repeat
+    writeln('Найти фамилию по номеру телефона? (1-если да,0-если нет)');
+    readln(k);
+    if k =1  then
+    begin
+      writeln('По какому номеру найти?');
+      readln(vvodstr);
+      FindPoNumber(beg1L,vvodstr);
+    end;
+  until k=0 ;
+
+  sleep(20000000);
+
+end.
