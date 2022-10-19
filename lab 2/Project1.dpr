@@ -1,0 +1,126 @@
+program Project1;
+
+{$APPTYPE CONSOLE}
+{$R *.res}
+
+uses
+  System.SysUtils;
+
+type
+  point = ^elem;
+  elem = record
+    data: Integer;
+    next: point;
+  end;
+
+var
+  m, k, amount, gout: Integer;
+  A, B: point;
+  Res: String;
+
+// Короче берешь список создаешь. Ферст тебе указатель на первый элемент
+// ты его спецом выделяешь, чтоб все снего шло и ты потом вернуться мог
+// потом циклом работаем, а в конце чтоб кольцо сделать мы ссылаем
+// последний элемент на ферст. Текущий указатель тоже на него кидаем,
+// иначе работать список будет с последнего элемента, а не первого
+procedure MakeSpisok(var eleppointer: point; n: Integer);
+var
+  i: Integer;
+  first: point;
+begin
+  // Создание первого элемента списка и присвоение его полю единицы
+  New(eleppointer);
+  // Указатель ставим на первый элемент
+  first := eleppointer;
+  first^.data := 1;
+  //
+  for i := 2 to n do
+  begin
+    New(eleppointer^.next);
+    eleppointer := eleppointer^.next;
+    eleppointer^.data := i;
+  end;
+  eleppointer^.next := first;
+  eleppointer := first;
+end;
+
+// здесь короче мы в ряду ищем кого кикаем. Номер кикаемого мы с клавы вводим,
+// пока счетчик не достиг его, то работаем. Но удалять можно не текущий, а следующий
+// т к мы удаляем просто разрываем связь указателей. Поэтому если счетчик плюс 1 это то
+// то в строку результата закидываем данные следуюшего элемента, а счетчик после
+// ставим на номер удаленного, чтою прекратить. Если это пока не тот, то просто
+// увеличиваем счетчик и переходим на новый элемент списка
+procedure FindToDelete (var i, x: Integer; var S: String; var curr: point);
+begin
+  while i < x do
+  begin
+    if i + 1 = x then
+    begin
+      S := S + IntToStr(curr^.next^.data) + ',';
+      i := x;
+    end
+    else
+    begin
+      inc(i);
+      curr := curr^.next;
+    end;
+  end;
+end;
+
+// Процедура из методы. Разрываем взаимсовязь когда один элемент указывает на следующий
+// а следующий на след-след
+procedure DeleteElem(var curr: point);
+begin
+  curr^.next := curr^.next^.next;
+end;
+
+// Эт  просто выпендрилась, но здесь я удаляю последнюю запятую в конце рядя
+// которые циклом ставлю и вывожу последний оставшийся элемент списка, а после все очищаю
+procedure ResOutput (var S: String; var curr: point);
+begin
+  Delete(S, Length(S), 1);
+  S := Res + '| Left:' + IntToStr(curr^.data);
+  writeln(S);
+  S := '';
+end;
+
+begin
+  write('Enter the number which goes out ');
+
+  // Ну короче нам тут надо для 64 вариантов сделать типа, вот все в цикл заворачиваем
+  // и вводим номер кикаемого
+  readln(gout);
+  for m := 1 to 64 do
+  begin
+    // Говорим шоб бегал по ряду из м человек
+    amount := m;
+    MakeSpisok(A, m);
+    writeln;
+    writeln('If there are ', m, ' children');
+    write('The row: ');
+
+    // Прерываемся на одном, я пробовала пока не будет пустота, но там чет кринж и
+    // не пашет, так что последний стала вручную обрабатывать
+    while amount <> 1 do
+    begin
+      k := 1;
+      FindToDelete(k, gout, Res, A);
+      DeleteElem(A);
+
+      // Ну тут даже когда удалили надо ж на следующий сместиться чтоб заново отсчет
+      // со следующего в списке начать
+      A := A^.next;
+
+      // Т к кикнули их меньше уже понятное дело
+      dec(amount);
+    end;
+    ResOutput(Res,A);
+
+    // Ну и в конце все очищаем получается, а потом заново ведь создаем и т д
+    // Там есть функция диспоуз эт как нью но она чет не пашет, поэтому я вручную
+    // пишу нил
+    A := nil;
+  end;
+  readln;
+
+end.
